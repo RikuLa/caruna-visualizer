@@ -1,10 +1,10 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { MeasurementPoint } from "./index";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import puppeteer, { Page, Browser } from "puppeteer";
 import { DateTime } from "luxon";
+import { Measurement, MeteringPoint, UserInfo } from "./types";
 
 const BASE_URL = "https://energiaseuranta.caruna.fi";
 const MOBILE_TRACKING_URL = BASE_URL + "/mobile/#/tracking";
@@ -71,7 +71,7 @@ const getCookies = async () => {
   }
 };
 
-export const fetchMeasurements = async (): Promise<Array<MeasurementPoint>> => {
+export const fetchMeasurements = async (): Promise<Array<Measurement>> => {
   const cookies: { name: string; value: string; path: string }[] =
     await getCookies();
 
@@ -86,7 +86,7 @@ export const fetchMeasurements = async (): Promise<Array<MeasurementPoint>> => {
 
   const cookie = `JSESSIONID=${JSESSIONID.value}; ARRAffinity=${ARRAffinity.value};`;
 
-  const userInfo = await axios.get(
+  const userInfo: AxiosResponse<UserInfo> = await axios.get(
     "https://energiaseuranta.caruna.fi/api/users?current",
     {
       headers: {
@@ -97,14 +97,15 @@ export const fetchMeasurements = async (): Promise<Array<MeasurementPoint>> => {
 
   const userId = userInfo.data.username;
 
-  const meteringPointInfo = await axios.get(
-    `https://energiaseuranta.caruna.fi/api/customers/${userId}/meteringPointInformationWrappers`,
-    {
-      headers: {
-        Cookie: cookie,
-      },
-    }
-  );
+  const meteringPointInfo: AxiosResponse<{ entities: MeteringPoint[] }> =
+    await axios.get(
+      `https://energiaseuranta.caruna.fi/api/customers/${userId}/meteringPointInformationWrappers`,
+      {
+        headers: {
+          Cookie: cookie,
+        },
+      }
+    );
 
   const meteringPointId =
     meteringPointInfo.data.entities[0].meteringPoint.meteringPointNumber;
@@ -115,5 +116,5 @@ export const fetchMeasurements = async (): Promise<Array<MeasurementPoint>> => {
     },
   });
 
-  return response.data as MeasurementPoint[];
+  return response.data as Measurement[];
 };

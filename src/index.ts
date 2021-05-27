@@ -1,27 +1,14 @@
 import { FieldType, InfluxDB } from "influx";
 import { fetchMeasurements } from "./fetchMeasurements";
 import { chunk } from "lodash";
+import { Measurement } from "./types";
 
 const DB_NAME = "usage";
 const MEASUREMENT = "consumption";
 
-export interface MeasurementPoint {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  week: number;
-  timestamp: string;
-  values: {
-    "EL_ENERGY_CONSUMPTION#0"?: {
-      value: number;
-    };
-  };
-}
-
 const writeMeasurements =
-  (client: InfluxDB) => async (measurementPoints: MeasurementPoint[]) => {
-    const points = measurementPoints
+  (client: InfluxDB) => async (measurements: Measurement[]) => {
+    const points = measurements
       .filter(({ values }) => !!values["EL_ENERGY_CONSUMPTION#0"])
       .map(({ values, timestamp, year, month, week, day, hour }) => {
         return {
