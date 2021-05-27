@@ -1,0 +1,36 @@
+{
+  "name": "caruna-visualizer",
+  "private": true,
+  "version": "0.0.1",
+  "main": "index.ts",
+  "repository": "git@github.com:RikuLa/caruna-visualizer.git",
+  "author": "Riku Laukkanen <riku.laukkanen@aalto.fi>",
+  "license": "MIT",
+  "scripts": {
+    "start": "ts-node --transpile-only src/index.ts",
+    "lint": "eslint src/*",
+    "check-ts": "tsc"
+  },
+  "dependencies": {
+    "axios": "^0.21.0",
+    "dotenv": "^8.2.0",
+    "influx": "^5.6.3",
+    "lodash": "^4.17.21",
+    "luxon": "^1.27.0",
+    "puppeteer": "^6.0.0",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.170",
+    "@types/luxon": "^1.26.5",
+    "@types/puppeteer": "^5.4.3",
+    "@typescript-eslint/eslint-plugin": "^4.25.0",
+    "@typescript-eslint/parser": "^4.25.0",
+    "eslint": "^7.27.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-import": "^2.23.3",
+    "eslint-plugin-prettier": "^3.4.0",
+    "prettier": "^2.3.0"
+  }
+}

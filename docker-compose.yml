@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  caruna-importer:
+    depends_on:
+      - influxdb
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=influxdb
+      - DB_PORT=8086
+  influxdb:
+    image: influxdb:1.8-alpine
+    ports:
+      - 8086:8086
+    volumes:
+      - influxdb-storage:/var/lib/influxdb
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    ports:
+      - 3000:3000
+volumes:
+  influxdb-storage:
+
