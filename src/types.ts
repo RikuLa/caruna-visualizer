@@ -21,3 +21,8 @@ export interface MeteringPoint {
     meteringPointNumber: number;
   };
 }
+
+export interface MeteringPointPayload {
+  meteringPointId: number;
+  measurements: Measurement[];
+}

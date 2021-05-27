@@ -1,29 +1,12 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import axios, { AxiosResponse } from "axios";
 import puppeteer, { Page, Browser } from "puppeteer";
-import { DateTime } from "luxon";
-import { Measurement, MeteringPoint, UserInfo } from "./types";
+import { MeteringPointPayload } from "./types";
+import { CarunaApiClient } from "./CarunaApiClient";
 
-const BASE_URL = "https://energiaseuranta.caruna.fi";
-const MOBILE_TRACKING_URL = BASE_URL + "/mobile/#/tracking";
-
-const buildApiUrl = (userId: number, meteringPointId: number) => {
-  const now = DateTime.now()
-    .plus({ days: 1 })
-    .startOf("second")
-    .toISO({ suppressMilliseconds: true });
-
-  console.log("Fetching until", now);
-
-  return (
-    BASE_URL +
-    `/api/meteringPoints/ELECTRICITY/${meteringPointId}/series?customerNumber=${userId}&endDate=${encodeURIComponent(
-      now
-    )}&products=EL_ENERGY_CONSUMPTION&resolution=MONTHS_AS_HOURS&startDate=2020-01-01T00:00:00%2B0300`
-  );
-};
+const MOBILE_TRACKING_URL =
+  "https://energiaseuranta.caruna.fi/mobile/#/tracking";
 
 const getCookies = async () => {
   let browser: Browser;
@@ -71,7 +54,9 @@ const getCookies = async () => {
   }
 };
 
-export const fetchMeasurements = async (): Promise<Array<Measurement>> => {
+export const fetchMeasurements = async (): Promise<
+  Array<MeteringPointPayload>
+> => {
   const cookies: { name: string; value: string; path: string }[] =
     await getCookies();
 
@@ -84,37 +69,10 @@ export const fetchMeasurements = async (): Promise<Array<Measurement>> => {
     throw new Error("Unable to get required cookies");
   }
 
-  const cookie = `JSESSIONID=${JSESSIONID.value}; ARRAffinity=${ARRAffinity.value};`;
-
-  const userInfo: AxiosResponse<UserInfo> = await axios.get(
-    "https://energiaseuranta.caruna.fi/api/users?current",
-    {
-      headers: {
-        Cookie: cookie,
-      },
-    }
-  );
-
-  const userId = userInfo.data.username;
-
-  const meteringPointInfo: AxiosResponse<{ entities: MeteringPoint[] }> =
-    await axios.get(
-      `https://energiaseuranta.caruna.fi/api/customers/${userId}/meteringPointInformationWrappers`,
-      {
-        headers: {
-          Cookie: cookie,
-        },
-      }
-    );
-
-  const meteringPointId =
-    meteringPointInfo.data.entities[0].meteringPoint.meteringPointNumber;
-
-  const response = await axios.get(buildApiUrl(userId, meteringPointId), {
-    headers: {
-      Cookie: cookie,
-    },
+  const client = new CarunaApiClient({
+    ARRAffinity: ARRAffinity.value,
+    JSESSIONID: JSESSIONID.value,
   });
 
-  return response.data as Measurement[];
+  return await client.fetchMeasurements();
 };
