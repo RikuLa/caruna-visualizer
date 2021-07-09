@@ -1,8 +1,8 @@
 import { FieldType, InfluxDB } from "influx";
 import { Measurement } from "./types";
 
-const DB_NAME = "usage";
-const MEASUREMENT = "consumption";
+const DB_NAME = "database";
+const MEASUREMENT = "electricity";
 
 export const writeMeasurements =
   (client: InfluxDB) =>

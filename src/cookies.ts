@@ -40,7 +40,7 @@ const getAllCookies = async (): Promise<Array<Cookie>> => {
     console.log("Waiting for cookies to be set");
     // Ugly hack alert, nav takes a little while so this ensures all the cookies needed are actually set
     await new Promise((res) => {
-      setTimeout(res, 5000);
+      setTimeout(res, 20000);
     });
 
     console.log("Waiting done");
