@@ -8,7 +8,9 @@ RUN apk add --no-cache \
       ca-certificates \
       ttf-freefont \
       nodejs \
-      yarn
+      yarn \
+      python3 \
+      build-base
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
