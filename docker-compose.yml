@@ -21,8 +21,10 @@ services:
     image: grafana/grafana
     volumes:
       - ./grafana/provisioning/:/etc/grafana/provisioning/
+      - grafana-storage:/var/lib/grafana
     ports:
       - "3000:3000"
 volumes:
   influxdb-storage:
+  grafana-storage:
 
