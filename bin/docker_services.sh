@@ -1,1 +1,1 @@
-docker compose up -d influxdb grafana
+docker-compose up -d influxdb grafana
