@@ -31,4 +31,9 @@ const main = async () => {
   }
 };
 
-setInterval(main, 1000 * 60 * 30);
+const start = async () => {
+  await main();
+  setInterval(main, 1000 * 60 * 30);
+};
+
+start();
