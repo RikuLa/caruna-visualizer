@@ -33,4 +33,6 @@ const run = async () => {
 
 const everyDayAtFourInTheAfternoon = "0 16 * * *";
 
+run();
+
 scheduleJob(everyDayAtFourInTheAfternoon, run);
