@@ -1,11 +1,9 @@
-// @ts-ignore
 import ruuvi from "node-ruuvitag";
 import { DataFormat5 } from "./types";
-import { getInfluxDBClient, writeMeasurement } from "./influxDB";
+import { getInfluxDBClient } from "./influxDB";
 
 const run = async () => {
   const client = await getInfluxDBClient();
-  const writer = writeMeasurement(client);
 
   ruuvi.on(
     "found",
@@ -17,7 +15,7 @@ const run = async () => {
 
       tag.on("updated", async (data: DataFormat5) => {
         console.log("Got data from RuuviTag " + data.mac);
-        await writer(data, data.mac);
+        await client.writeMeasurements([data]);
       });
     }
   );

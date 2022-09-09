@@ -3,14 +3,11 @@ dotenv.config();
 
 import { fetchMeasurements } from "./fetchMeasurements";
 import { chunk } from "lodash";
-import { getInfluxDBClient, writeMeasurements } from "./influxDB";
+import { getInfluxDBClient } from "./influxDB";
 
 const main = async () => {
   try {
     const client = await getInfluxDBClient();
-
-    const writer = writeMeasurements(client);
-
     const measurements = await fetchMeasurements();
 
     for (const m of measurements) {
@@ -20,7 +17,7 @@ const main = async () => {
 
       for (const b of batchedMeasurements) {
         try {
-          await writer(b, m.meteringPointId);
+          await client.writeMeasurements(b);
         } catch (e) {
           console.error("unable to write", e.message);
         }

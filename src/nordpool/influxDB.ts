@@ -1,5 +1,6 @@
-import { FieldType, InfluxDB } from "influx";
+import { FieldType } from "influx";
 import { DataPoint } from "./types";
+import { InfluxDBClient } from "../common/InfluxDB";
 
 const DB_NAME = "database";
 const MEASUREMENT = "nordpool";
@@ -18,37 +19,14 @@ const mapDataToInflux = (data: DataPoint[]) =>
     };
   });
 
-export const writeMeasurement = async (
-  client: InfluxDB,
-  data: DataPoint[]
-): Promise<void> => {
-  await client.writePoints(mapDataToInflux(data), {
-    database: DB_NAME,
-    precision: "ms",
-  });
+const schema = {
+  measurement: MEASUREMENT,
+  fields: {
+    price: FieldType.FLOAT,
+  },
+  tags: ["area"],
 };
 
-export const getInfluxDBClient = async (): Promise<InfluxDB> => {
-  const client = await new InfluxDB({
-    database: DB_NAME,
-    host: process.env.DB_HOST || "localhost",
-    port: Number(process.env.DB_PORT) || 8086,
-    schema: [
-      {
-        measurement: MEASUREMENT,
-        fields: {
-          price: FieldType.FLOAT,
-        },
-        tags: ["area"],
-      },
-    ],
-  });
-
-  const names = await client.getDatabaseNames();
-
-  if (!names.includes(DB_NAME)) {
-    await client.createDatabase(DB_NAME);
-  }
-
-  return client;
+export const getInfluxDBClient = (): InfluxDBClient<DataPoint> => {
+  return new InfluxDBClient(schema, DB_NAME, mapDataToInflux);
 };
