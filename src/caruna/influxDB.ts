@@ -1,60 +1,37 @@
-import { FieldType, InfluxDB } from "influx";
+import { FieldType, IPoint } from "influx";
 import { Measurement } from "./types";
+import { InfluxDBClient } from "../common/InfluxDB";
 
 const DB_NAME = "database";
 const MEASUREMENT = "electricity";
 
-export const writeMeasurements =
-  (client: InfluxDB) =>
-  async (
-    measurements: Measurement[],
-    meteringPointId: number
-  ): Promise<void> => {
-    const points = measurements
-      .filter(({ values }) => !!values["EL_ENERGY_CONSUMPTION#0"])
-      .map(({ values, timestamp, year, month, week, day, hour }) => {
-        return {
-          measurement: MEASUREMENT,
-          tags: {
-            year: String(year),
-            month: String(month),
-            week: String(week),
-            day: String(day),
-            hour: String(hour),
-            metering_point_id: String(meteringPointId),
-          },
-          fields: { value: values["EL_ENERGY_CONSUMPTION#0"].value },
-          timestamp: new Date(timestamp).getTime(),
-        };
-      });
-
-    await client.writePoints(points, {
-      database: DB_NAME,
-      precision: "ms",
-    });
-  };
-
-export const getInfluxDBClient = async (): Promise<InfluxDB> => {
-  const client = await new InfluxDB({
-    database: DB_NAME,
-    host: process.env.DB_HOST || "localhost",
-    port: Number(process.env.DB_PORT) || 8086,
-    schema: [
-      {
+const writeMeasurements = (measurements: Measurement[]): IPoint[] => {
+  return measurements
+    .filter(({ values }) => !!values["EL_ENERGY_CONSUMPTION#0"])
+    .map(({ values, timestamp, year, month, week, day, hour }) => {
+      return {
         measurement: MEASUREMENT,
-        fields: {
-          value: FieldType.FLOAT,
+        tags: {
+          year: String(year),
+          month: String(month),
+          week: String(week),
+          day: String(day),
+          hour: String(hour),
         },
-        tags: ["hour", "month", "day", "year", "week", "metering_point_id"],
-      },
-    ],
-  });
+        fields: { value: values["EL_ENERGY_CONSUMPTION#0"].value },
+        timestamp: new Date(timestamp).getTime(),
+      };
+    });
+};
 
-  const names = await client.getDatabaseNames();
+const schema = {
+  measurement: MEASUREMENT,
+  fields: {
+    value: FieldType.FLOAT,
+  },
+  tags: ["hour", "month", "day", "year", "week", "metering_point_id"],
+};
 
-  if (!names.includes(DB_NAME)) {
-    await client.createDatabase(DB_NAME);
-  }
-
-  return client;
+export const getInfluxDBClient = (): InfluxDBClient<Measurement> => {
+  return new InfluxDBClient(schema, DB_NAME, writeMeasurements);
 };

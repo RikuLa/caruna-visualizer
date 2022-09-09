@@ -2,7 +2,7 @@ import axios from "axios";
 import { scheduleJob } from "node-schedule";
 import { DateTime } from "luxon";
 import { DataPoint, NordpoolResponse } from "./types";
-import { getInfluxDBClient, writeMeasurement } from "./influxDB";
+import { getInfluxDBClient } from "./influxDB";
 
 const HOURLY_CHART_ID = 10;
 
@@ -27,7 +27,7 @@ const getData = async (): Promise<DataPoint[]> => {
 const run = async () => {
   const client = await getInfluxDBClient();
   const dataPoints = await getData();
-  await writeMeasurement(client, dataPoints);
+  await client.writeMeasurements(dataPoints);
   console.log("Successfully wrote ", dataPoints.length);
 };
 

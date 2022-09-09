@@ -1,54 +1,35 @@
-import { FieldType, InfluxDB } from "influx";
+import { FieldType, IPoint } from "influx";
+import { InfluxDBClient } from "../common/InfluxDB";
 import { DataFormat5 } from "./types";
 
 const DB_NAME = "database";
 const MEASUREMENT = "ruuvi";
 
-export const writeMeasurement =
-  (client: InfluxDB) =>
-  async (data: DataFormat5, ruuviMacAddress: string): Promise<void> => {
-    const m = {
-      measurement: MEASUREMENT,
-      tags: {
-        mac: ruuviMacAddress,
-      },
-      fields: {
-        humidity: data.humidity,
-        pressure: data.pressure,
-        temperature: data.temperature,
-      },
-      timestamp: new Date().getTime(),
-    };
+export const writeMeasurement = (data: DataFormat5[]): IPoint[] => {
+  return data.map((d) => ({
+    measurement: MEASUREMENT,
+    tags: {
+      mac: d.mac,
+    },
+    fields: {
+      humidity: d.humidity,
+      pressure: d.pressure,
+      temperature: d.temperature,
+    },
+    timestamp: new Date().getTime(),
+  }));
+};
 
-    await client.writePoints([m], {
-      database: DB_NAME,
-      precision: "ms",
-    });
-  };
+const schema = {
+  measurement: MEASUREMENT,
+  fields: {
+    temperature: FieldType.FLOAT,
+    humidity: FieldType.FLOAT,
+    pressure: FieldType.FLOAT,
+  },
+  tags: ["mac"],
+};
 
-export const getInfluxDBClient = async (): Promise<InfluxDB> => {
-  const client = await new InfluxDB({
-    database: DB_NAME,
-    host: process.env.DB_HOST || "localhost",
-    port: Number(process.env.DB_PORT) || 8086,
-    schema: [
-      {
-        measurement: MEASUREMENT,
-        fields: {
-          temperature: FieldType.FLOAT,
-          humidity: FieldType.FLOAT,
-          pressure: FieldType.FLOAT,
-        },
-        tags: ["mac"],
-      },
-    ],
-  });
-
-  const names = await client.getDatabaseNames();
-
-  if (!names.includes(DB_NAME)) {
-    await client.createDatabase(DB_NAME);
-  }
-
-  return client;
+export const getInfluxDBClient = (): InfluxDBClient<DataFormat5> => {
+  return new InfluxDBClient(schema, DB_NAME, writeMeasurement);
 };
