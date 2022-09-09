@@ -7,7 +7,7 @@
   "author": "Riku Laukkanen <riku.laukkanen@aalto.fi>",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node --transpile-only src/index.ts",
+    "start:caruna": "ts-node --transpile-only src/caruna/index.ts",
     "start:ruuvi": "ts-node --transpile-only src/ruuvi/listener.ts",
     "start:nordpool": "ts-node --transpile-only src/nordpool/index.ts",
     "lint": "eslint src/*",

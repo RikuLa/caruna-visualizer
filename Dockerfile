@@ -20,4 +20,4 @@ ADD package.json yarn.lock tsconfig.json /app/
 ADD ./src /app/src
 RUN yarn install
 
-CMD ["yarn", "start"]
+CMD ["yarn", "start:caruna"]
